@@ -1,11 +1,21 @@
 #include <iostream>
 #include "private-method.h"
+#include "stanza.h"
+
+int PrivateMethod::acquire(std::istream &in)
+{
+	Stanza stanza(in);
+
+	/* TODO */
+
+	return 0;
+}
 
 int PrivateMethod::loop()
 {
 	std::string line;
 	unsigned int code;
-	int ret = 0;
+	int retval = 0, ret;
 
 	while (std::cin.good()) {
 		try {
@@ -18,10 +28,13 @@ int PrivateMethod::loop()
 
 			switch (code) {
 			case 600:
-				/* TODO - acquire */
+				ret = acquire(std::cin);
+				if (ret != 0) {
+					retval = ret;
+				}
 				break;
 			default:
-				throw std::invalid_argument("aa");
+				throw std::invalid_argument("Unexpected command.");
 				break;
 			}
 
@@ -31,5 +44,5 @@ int PrivateMethod::loop()
 		}
 	}
 
-	return ret;
+	return retval;
 }

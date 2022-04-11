@@ -5,7 +5,7 @@ CC = g++
 CFLAGS = -Wall -O2
 LFLAGS =
 
-OBJECTS = main.o private-method.o
+OBJECTS = main.o private-method.o stanza.o
 
 all: $(HELPER)
 	sh test.sh
