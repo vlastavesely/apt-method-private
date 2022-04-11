@@ -1,6 +1,7 @@
 #include <iostream>
+#include "private-method.h"
 
 int main(int argc, const char **argv)
 {
-	return 0;
+	return PrivateMethod().loop();
 }

@@ -5,10 +5,10 @@ CC = g++
 CFLAGS = -Wall -O2
 LFLAGS =
 
-OBJECTS = main.o
+OBJECTS = main.o private-method.o
 
 all: $(HELPER)
-	./$(HELPER)
+	sh test.sh
 
 include $(wildcard *.d */*.d)
 
