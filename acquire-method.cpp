@@ -1,8 +1,16 @@
 #include <iostream>
-#include "private-method.h"
+#include "acquire-method.h"
 #include "stanza.h"
 
-int PrivateMethod::acquire(std::istream &in)
+static void printCapabilities()
+{
+	std::cout << "100 Capabilities" << std::endl;
+	std::cout << "Version: 1.0" << std::endl;
+	std::cout << "Single-Instance: true" << std::endl;
+	std::cout << std::endl;
+}
+
+int AcquireMethod::acquire(std::istream &in)
 {
 	Stanza stanza(in);
 
@@ -11,11 +19,13 @@ int PrivateMethod::acquire(std::istream &in)
 	return 0;
 }
 
-int PrivateMethod::loop()
+int AcquireMethod::loop()
 {
 	std::string line;
 	unsigned int code;
 	int retval = 0, ret;
+
+	printCapabilities();
 
 	while (std::cin.good()) {
 		try {
