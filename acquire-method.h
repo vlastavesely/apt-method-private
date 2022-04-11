@@ -3,6 +3,7 @@
 
 class AcquireMethod {
 private:
+	void reportGeneralFailure(const std::string &message);
 	int acquire(std::istream &in);
 public:
 	int loop();

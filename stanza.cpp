@@ -11,11 +11,16 @@ int Stanza::parseHeader(const std::string &line)
 		return -1;
 
 	key = line.substr(0, pos);
-	val = line.substr(pos + 1);
+	val = line.substr(pos + 2);
 
 	fields[key] = val;
 
 	return 0;
+}
+
+std::string Stanza::operator[](const std::string &key)
+{
+	return fields[key.data()];
 }
 
 Stanza::Stanza(std::istream &in)

@@ -10,11 +10,36 @@ static void printCapabilities()
 	std::cout << std::endl;
 }
 
+static void sendMessage(const std::string &message,
+			const std::map<std::string, std::string> &fields)
+{
+	std::cout << message << std::endl;
+
+	for (const auto &[key, val] : fields) {
+		if (val.length() == 0)
+			continue;
+
+		std::cout << key << ": " << val << std::endl;
+	}
+
+	std::cout << std::endl;
+}
+
+void AcquireMethod::reportGeneralFailure(const std::string &message)
+{
+	sendMessage("401 General Failure", {{"Message", message}});
+}
+
 int AcquireMethod::acquire(std::istream &in)
 {
+	std::string uri;
 	Stanza stanza(in);
 
+	uri = stanza["URI"];
+
 	/* TODO */
+
+	sendMessage("201 URI Done", {{"URI", uri}});
 
 	return 0;
 }
@@ -48,8 +73,12 @@ int AcquireMethod::loop()
 				break;
 			}
 
+		} catch (const std::invalid_argument &e) {
+			reportGeneralFailure(e.what());
+			return -1;
+
 		} catch (const std::exception &e) {
-			std::cout << "ERROR: " << e.what() << std::endl; /* FIXME */
+			reportGeneralFailure("Unexpected error.");
 			return -1;
 		}
 	}

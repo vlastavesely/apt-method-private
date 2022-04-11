@@ -11,6 +11,7 @@ private:
 	int parseHeader(const std::string &line);
 public:
 	Stanza(std::istream &in);
+	std::string operator[](const std::string &key);
 };
 
 #endif /* __STANZA_H */

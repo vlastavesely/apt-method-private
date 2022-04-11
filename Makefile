@@ -2,7 +2,7 @@ HELPER = private
 
 CC = g++
 
-CFLAGS = -Wall -O2
+CFLAGS = -Wall -O2 -std=c++17
 LFLAGS =
 
 OBJECTS = main.o private-method.o acquire-method.o stanza.o
