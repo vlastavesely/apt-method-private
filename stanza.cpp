@@ -23,6 +23,15 @@ std::string Stanza::operator[](const std::string &key)
 	return fields[key.data()];
 }
 
+
+std::map<std::string, std::string>::iterator Stanza::begin() {
+	return fields.begin();
+};
+
+std::map<std::string, std::string>::iterator Stanza::end() {
+	return fields.end();
+};
+
 Stanza::Stanza(std::istream &in)
 {
 	std::string line;
