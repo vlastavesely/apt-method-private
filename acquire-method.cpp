@@ -57,18 +57,36 @@ void AcquireMethod::reportGeneralFailure(const std::string &message)
 	sendMessage("401 General Failure", {{"Message", message}});
 }
 
+void AcquireMethod::reportUriFailure(const std::string &uri, const uri_exception &e)
+{
+	sendMessage("400 URI Failure", {
+		{"URI", uri},
+		{"FailReason", e.reason()},
+		{"Message", e.what()}
+	});
+}
+
 int AcquireMethod::acquire(std::istream &in)
 {
-	std::string uri;
+	std::string uri, filename;
 	Stanza stanza(in);
+	int ret = 0;
 
 	uri = stanza["URI"];
+	filename = stanza["Filename"];
 
-	/* TODO */
+	try {
+		/* TODO convert the return code to an exception? */
+		ret = fetchFile(stanza);
+
+	} catch (const uri_exception &e) {
+		reportUriFailure(uri, e);
+		return 100;
+	}
 
 	sendMessage("201 URI Done", {{"URI", uri}});
 
-	return 0;
+	return ret;
 }
 
 int AcquireMethod::loop()
