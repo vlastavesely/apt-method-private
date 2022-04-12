@@ -10,11 +10,38 @@ static void printCapabilities()
 	std::cout << std::endl;
 }
 
+/*
+ * Checking of the messages is based on the code used in the official APT helpers:
+ * https://salsa.debian.org/apt-team/apt/-/blob/main/apt-pkg/acquire-method.cc#L89
+ */
 static void sendMessage(const std::string &message,
 			const std::map<std::string, std::string> &fields)
 {
-	std::cout << message << std::endl;
+	auto checkKey = [](const std::string &s) {
+		 return std::all_of(s.begin(), s.end(), [](unsigned char c) -> bool {
+		 	/* alphanumeric, hyphen or a space */
+			return std::isalnum(c) || c == '-' || c == ' ';
+		 });
+	};
 
+	auto checkValue = [](const std::string &s) {
+		 return std::all_of(s.begin(), s.end(), [](unsigned char c) -> bool {
+		 	/* unicode characters, printable characters or a tab */
+			return c > 127 || (c > 31 && c < 127) || c == '\t';
+		 });
+	};
+
+	for (const auto &[key, val] : fields) {
+		if (!checkKey(key) || !checkValue(val)) {
+			sendMessage("400 URI Failure", {
+				{"URI", "<UNKNOWN>"},
+				{"Message", "SECURITY: Message contains control characters, rejecting."}
+			});
+			abort();
+		}
+	}
+
+	std::cout << message << std::endl;
 	for (const auto &[key, val] : fields) {
 		if (val.length() == 0)
 			continue;
