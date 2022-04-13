@@ -1,6 +1,8 @@
 #include <iostream>
 #include "test.h"
 #include "stanza.h"
+#include "config.h"
+#include "uri.h"
 
 static struct Suite *create_test_suite()
 {
@@ -12,6 +14,8 @@ static struct Suite *create_test_suite()
 	suite_add_tcase(suite, test_case);
 
 	register_stanza_tests(test_case);
+	register_config_tests(test_case);
+	register_uri_tests(test_case);
 
 	return suite;
 }

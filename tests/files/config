@@ -1,0 +1,9 @@
+Origin: httpserver
+URI: https://localhost/apt-test
+Salt: salt1
+Key: key1
+
+Origin: ftpserver
+URI: ftpes://ftpuser:secret@localhost/apt-test/
+Salt: salt2
+Key: key2
