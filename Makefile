@@ -3,13 +3,13 @@ TESTPROG = tests/test
 
 CC = g++
 
-CFLAGS = -Wall -O2 -std=c++20
-LFLAGS =
+CFLAGS = $(shell pkg-config --cflags openssl) -Wall -O2 -std=c++20
+LFLAGS = $(shell pkg-config --libs openssl)
 
-TESTCFLAGS = $(shell pkg-config --cflags check)
-TESTLFLAGS = $(shell pkg-config --libs check)
+TESTCFLAGS = $(CFLAGS) $(shell pkg-config --cflags check)
+TESTLFLAGS = $(LFLAGS) $(shell pkg-config --libs check)
 
-OBJECTS = private-method.o acquire-method.o stanza.o config.o uri.o
+OBJECTS = private-method.o acquire-method.o stanza.o config.o uri.o hash.o hex.o
 
 TESTSOURCES = $(wildcard tests/*.cpp)
 TESTOBJECTS = $(OBJECTS) $(TESTSOURCES:%.cpp=%.o)

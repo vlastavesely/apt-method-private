@@ -3,6 +3,8 @@
 #include "stanza.h"
 #include "config.h"
 #include "uri.h"
+#include "hash.h"
+#include "hex.h"
 
 static struct Suite *create_test_suite()
 {
@@ -16,6 +18,8 @@ static struct Suite *create_test_suite()
 	register_stanza_tests(test_case);
 	register_config_tests(test_case);
 	register_uri_tests(test_case);
+	register_hash_tests(test_case);
+	register_hex_tests(test_case);
 
 	return suite;
 }
