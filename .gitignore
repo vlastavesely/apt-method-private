@@ -1,4 +1,5 @@
 /private
+/tools/encoder
 /tests/test
 *.o
 *.d

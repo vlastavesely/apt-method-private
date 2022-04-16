@@ -1,26 +1,30 @@
 HELPER = private
+ENCODER = tools/encoder
 TESTPROG = tests/test
 
 CC = g++
 
-CFLAGS = $(shell pkg-config --cflags openssl) -Wall -O2 -std=c++20
-LFLAGS = $(shell pkg-config --libs openssl)
+CFLAGS = $(shell pkg-config --cflags openssl libcurl) -Wall -O2 -std=c++20
+LFLAGS = $(shell pkg-config --libs openssl libcurl)
 
 TESTCFLAGS = $(CFLAGS) $(shell pkg-config --cflags check)
 TESTLFLAGS = $(LFLAGS) $(shell pkg-config --libs check)
 
-OBJECTS = private-method.o acquire-method.o stanza.o config.o uri.o hash.o hex.o
+OBJECTS = private-method.o acquire-method.o stanza.o config.o uri.o hash.o hex.o fetch.o
 
 TESTSOURCES = $(wildcard tests/*.cpp)
 TESTOBJECTS = $(OBJECTS) $(TESTSOURCES:%.cpp=%.o)
 
 
-all: $(HELPER)
+all: $(HELPER) $(ENCODER)
 	sh test.sh
 
 include $(wildcard *.d */*.d)
 
 $(HELPER): main.o $(OBJECTS)
+	$(CC) $^ -o $@ $(LFLAGS)
+
+$(ENCODER): tools/encoder.o $(OBJECTS)
 	$(CC) $^ -o $@ $(LFLAGS)
 
 %.o: %.cpp
@@ -36,4 +40,4 @@ test: $(TESTPROG)
 	$(TESTPROG)
 
 clean:
-	$(RM) $(HELPER) $(TESTPROG) *.o *.d */*.o */*.d
+	$(RM) $(HELPER) $(ENCODER) $(TESTPROG) *.o *.d */*.o */*.d
