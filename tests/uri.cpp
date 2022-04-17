@@ -24,7 +24,6 @@ START_TEST(test_uri_failures)
 	}
 
 	ck_assert_str_eq("Invalid URI.", message.c_str());
-
 }
 END_TEST
 

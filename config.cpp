@@ -11,7 +11,7 @@ int Config::loadFromFile(const std::string &configFile)
 		Stanza stanza(in);
 
 		origin = stanza["Origin"];
-		if (origin.length() == 0)
+		if (origin == "")
 			continue;
 
 		for (auto &[key, val] : stanza) {

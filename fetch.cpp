@@ -9,6 +9,7 @@ static int set_uri(CURL *curl, const char *uri)
 {
 	if (strncmp(uri, "ftpes://", 8) == 0) {
 		char *dup = strdup(uri);
+		/* Change ‘ftpes://’ to ‘ftp://’ */
 		memmove(dup + 3, dup + 5, strlen(dup) - 4);
 		curl_easy_setopt(curl, CURLOPT_URL, dup);
 		curl_easy_setopt(curl, CURLOPT_USE_SSL, 1);

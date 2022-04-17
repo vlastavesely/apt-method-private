@@ -27,5 +27,5 @@ URI::URI(std::string uri)
 
 bool URI::isProtocol(const std::string &proto)
 {
-	return protocol.compare(proto) == 0;
+	return protocol == proto;
 }

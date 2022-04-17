@@ -14,8 +14,8 @@ static void printCapabilities()
  * Checking of the messages is based on the code used in the official APT helpers:
  * https://salsa.debian.org/apt-team/apt/-/blob/main/apt-pkg/acquire-method.cc#L89
  */
-static void sendMessage(const std::string &message,
-			const std::map<std::string, std::string> &fields)
+void AcquireMethod::sendMessage(const std::string &message,
+				const std::map<std::string, std::string> &fields)
 {
 	auto checkKey = [](const std::string &s) {
 		 return std::all_of(s.begin(), s.end(), [](unsigned char c) -> bool {
@@ -57,10 +57,10 @@ void AcquireMethod::reportGeneralFailure(const std::string &message)
 	sendMessage("401 General Failure", {{"Message", message}});
 }
 
-void AcquireMethod::reportUriFailure(const std::string &uri, const uri_exception &e)
+void AcquireMethod::reportUriFailure(const uri_exception &e)
 {
 	sendMessage("400 URI Failure", {
-		{"URI", uri},
+		{"URI", e.uri()},
 		{"FailReason", e.reason()},
 		{"Message", e.what()}
 	});
@@ -68,23 +68,22 @@ void AcquireMethod::reportUriFailure(const std::string &uri, const uri_exception
 
 int AcquireMethod::acquire(std::istream &in)
 {
-	std::string uri, filename;
 	Stanza stanza(in);
 	int ret = 0;
 
-	uri = stanza["URI"];
-	filename = stanza["Filename"];
-
 	try {
-		/* TODO convert the return code to an exception? */
+		/* TODO handle the return code...? */
 		ret = fetchFile(stanza);
+		if (ret != 0) {
+			throw std::invalid_argument("XXX"); // FIXME
+		}
 
 	} catch (const uri_exception &e) {
-		reportUriFailure(uri, e);
+		reportUriFailure(e);
 		return 100;
 	}
 
-	sendMessage("201 URI Done", {{"URI", uri}});
+	sendMessage("201 URI Done", {{"URI", stanza["URI"]}});
 
 	return ret;
 }
@@ -96,6 +95,8 @@ int AcquireMethod::loop()
 	int retval = 0, ret;
 
 	printCapabilities();
+
+	config.loadFromFile("config"); /* FIXME */
 
 	while (std::cin.good()) {
 		try {
