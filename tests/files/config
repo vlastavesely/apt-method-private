@@ -1,7 +1,7 @@
 Origin: httpserver
 URI: https://localhost/apt-test
 Salt: salt1
-Key: key1
+Key: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 Origin: ftpserver
 URI: ftpes://ftpuser:secret@localhost/apt-test/

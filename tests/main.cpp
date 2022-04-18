@@ -6,6 +6,7 @@
 #include "hash.h"
 #include "hex.h"
 #include "fetch.h"
+#include "origin.h"
 
 static struct Suite *create_test_suite()
 {
@@ -22,6 +23,7 @@ static struct Suite *create_test_suite()
 	register_hash_tests(test_case);
 	register_hex_tests(test_case);
 	register_fetch_tests(test_case);
+	register_origin_tests(test_case);
 
 	return suite;
 }
