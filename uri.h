@@ -10,7 +10,7 @@ public:
 	std::string origin;
 	std::string path;
 	URI(std::string uri);
-	bool isProtocol(const std::string &proto);
+	bool is_protocol(const std::string &proto);
 
 	operator std::string() const {
 		return whole_uri;

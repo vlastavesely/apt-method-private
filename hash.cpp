@@ -2,15 +2,15 @@
 #include "hash.h"
 #include "hex.h"
 
-std::string hashSha1(const std::string &salt, const std::string &path)
+std::string hash_sha1(const std::string &salt, const std::string &path)
 {
-	unsigned char digest[20];
 	struct SHAstate_st state;
+	unsigned char digest[20];
 
 	SHA1_Init(&state);
 	SHA1_Update(&state, salt.data(), salt.length());
 	SHA1_Update(&state, path.data(), path.length());
 	SHA1_Final(digest, &state);
 
-	return hexEncode(digest, sizeof(digest));
+	return hex_encode(digest, sizeof(digest));
 }

@@ -9,7 +9,7 @@
 class Stanza {
 private:
 	std::map<std::string, std::string> fields;
-	int parseHeader(const std::string &line);
+	int parse_header(const std::string &line);
 public:
 	Stanza(std::istream &in);
 	std::string operator[](const std::string &key);

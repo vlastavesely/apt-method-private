@@ -42,7 +42,7 @@ static inline unsigned int hexval(unsigned char c)
 	return hexval_table[c];
 }
 
-std::string hexEncode(const unsigned char *bin, unsigned int len)
+std::string hex_encode(const unsigned char *bin, unsigned int len)
 {
 	std::string hex = "";
 	unsigned int i;
@@ -55,7 +55,7 @@ std::string hexEncode(const unsigned char *bin, unsigned int len)
 	return hex;
 }
 
-int hexDecode(unsigned char *binary, const std::string hexadecimal)
+int hex_decode(unsigned char *binary, const std::string hexadecimal)
 {
 	const char *hex = hexadecimal.data();
 	unsigned int val, len = hexadecimal.length() / 2;

@@ -3,7 +3,7 @@
 
 #include <string>
 
-std::string hexEncode(const unsigned char *bin, unsigned int len);
-int hexDecode(unsigned char *bin, const std::string hex);
+std::string hex_encode(const unsigned char *bin, unsigned int len);
+int hex_decode(unsigned char *bin, const std::string hex);
 
 #endif /* __HEX_H */

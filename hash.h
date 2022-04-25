@@ -3,6 +3,6 @@
 
 #include <string>
 
-std::string hashSha1(const std::string &salt, const std::string &path);
+std::string hash_sha1(const std::string &salt, const std::string &path);
 
 #endif /* __HASH_H */

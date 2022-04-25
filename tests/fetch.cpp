@@ -27,7 +27,7 @@ START_TEST(test_fetch)
 	cwd = std::filesystem::current_path();
 	uri = "file://" + cwd + "/tests/files/stanzas";
 
-	ret = fetchUri(uri, TEST_FILE);
+	ret = fetch_uri(uri, TEST_FILE);
 	ck_assert_int_eq(0, ret);
 
 	ret = load_file(a, "tests/files/stanzas");

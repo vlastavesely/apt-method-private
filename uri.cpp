@@ -25,7 +25,7 @@ URI::URI(std::string uri)
 	path = uri.substr(pos);
 }
 
-bool URI::isProtocol(const std::string &proto)
+bool URI::is_protocol(const std::string &proto)
 {
 	return protocol == proto;
 }

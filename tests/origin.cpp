@@ -5,14 +5,14 @@
 START_TEST(test_origin)
 {
 	Config config;
-	config.loadFromFile("tests/files/config");
+	config.load_from_file("tests/files/config");
 
-	Origin origin1(config, "httpserver");
-	ck_assert_str_eq("https://localhost/apt-test", origin1.uri.data());
-	ck_assert_str_eq("salt1", origin1.salt.data());
+	Origin origin(config, "httpserver");
+	ck_assert_str_eq("https://localhost/apt-test", origin.uri.data());
+	ck_assert_str_eq("salt1", origin.salt.data());
 
 	for (int i = 0; i < 32; i++) {
-		ck_assert_int_eq(0xaa, origin1.key[i]);
+		ck_assert_int_eq(0xaa, origin.key[i]);
 	}
 }
 END_TEST
@@ -20,7 +20,7 @@ END_TEST
 START_TEST(test_origin_bad_key)
 {
 	Config config;
-	config.loadFromFile("tests/files/config");
+	config.load_from_file("tests/files/config");
 	std::string msg = "";
 
 	try {

@@ -2,9 +2,9 @@
 #include "config.h"
 #include "stanza.h"
 
-int Config::loadFromFile(const std::string &configFile)
+int Config::load_from_file(const std::string &config_file)
 {
-	std::fstream in(configFile);
+	std::fstream in(config_file);
 	std::string origin;
 
 	while (in.good()) {

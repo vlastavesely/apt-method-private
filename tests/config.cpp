@@ -6,7 +6,7 @@ START_TEST(test_config)
 	Config config;
 	std::string str;
 
-	config.loadFromFile("tests/files/config");
+	config.load_from_file("tests/files/config");
 
 	str = config["Private::httpserver::Origin"];
 	ck_assert_str_eq("httpserver", str.c_str());

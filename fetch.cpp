@@ -22,7 +22,7 @@ static int set_uri(CURL *curl, const char *uri)
 	return 0;
 }
 
-int fetchUri(const std::string &uri, const std::string &filename)
+int fetch_uri(const std::string &uri, const std::string &filename)
 {
 	CURL *curl;
 	FILE *fp;

@@ -1,8 +1,12 @@
+/*
+ * More information about the APT helpers:
+ * http://www.fifi.org/doc/libapt-pkg-doc/method.html/ch2.html
+ */
 #include <iostream>
 #include "acquire-method.h"
 #include "stanza.h"
 
-static void printCapabilities()
+static void print_capabilities()
 {
 	std::cout << "100 Capabilities" << std::endl;
 	std::cout << "Version: 1.0" << std::endl;
@@ -14,8 +18,8 @@ static void printCapabilities()
  * Checking of the messages is based on the code used in the official APT helpers:
  * https://salsa.debian.org/apt-team/apt/-/blob/main/apt-pkg/acquire-method.cc#L89
  */
-void AcquireMethod::sendMessage(const std::string &message,
-				const std::map<std::string, std::string> &fields)
+void AcquireMethod::send_message(const std::string &message,
+				 const std::map<std::string, std::string> &fields)
 {
 	auto checkKey = [](const std::string &s) {
 		 return std::all_of(s.begin(), s.end(), [](unsigned char c) -> bool {
@@ -33,7 +37,7 @@ void AcquireMethod::sendMessage(const std::string &message,
 
 	for (const auto &[key, val] : fields) {
 		if (!checkKey(key) || !checkValue(val)) {
-			sendMessage("400 URI Failure", {
+			send_message("400 URI Failure", {
 				{"URI", "<UNKNOWN>"},
 				{"Message", "SECURITY: Message contains control characters, rejecting."}
 			});
@@ -52,14 +56,14 @@ void AcquireMethod::sendMessage(const std::string &message,
 	std::cout << std::endl;
 }
 
-void AcquireMethod::reportGeneralFailure(const std::string &message)
+void AcquireMethod::report_general_failure(const std::string &message)
 {
-	sendMessage("401 General Failure", {{"Message", message}});
+	send_message("401 General Failure", {{"Message", message}});
 }
 
-void AcquireMethod::reportUriFailure(const uri_exception &e)
+void AcquireMethod::report_uri_failure(const uri_exception &e)
 {
-	sendMessage("400 URI Failure", {
+	send_message("400 URI Failure", {
 		{"URI", e.uri()},
 		{"FailReason", e.reason()},
 		{"Message", e.what()}
@@ -73,17 +77,17 @@ int AcquireMethod::acquire(std::istream &in)
 
 	try {
 		/* TODO handle the return code...? */
-		ret = fetchFile(stanza);
+		ret = fetch_file(stanza);
 		if (ret != 0) {
 			throw std::invalid_argument("XXX"); // FIXME
 		}
 
 	} catch (const uri_exception &e) {
-		reportUriFailure(e);
+		report_uri_failure(e);
 		return 100;
 	}
 
-	sendMessage("201 URI Done", {{"URI", stanza["URI"]}});
+	send_message("201 URI Done", {{"URI", stanza["URI"]}});
 
 	return ret;
 }
@@ -94,9 +98,9 @@ int AcquireMethod::loop()
 	unsigned int code;
 	int retval = 0, ret;
 
-	printCapabilities();
+	print_capabilities();
 
-	config.loadFromFile("config"); /* FIXME */
+	config.load_from_file("config"); /* FIXME */
 
 	while (std::cin.good()) {
 		try {
@@ -120,11 +124,11 @@ int AcquireMethod::loop()
 			}
 
 		} catch (const std::invalid_argument &e) {
-			reportGeneralFailure(e.what());
+			report_general_failure(e.what());
 			return -1;
 
 		} catch (const std::exception &e) {
-			reportGeneralFailure("Unexpected error.");
+			report_general_failure("Unexpected error.");
 			return -1;
 		}
 	}

@@ -1,7 +1,7 @@
 #include <iostream>
 #include "stanza.h"
 
-int Stanza::parseHeader(const std::string &line)
+int Stanza::parse_header(const std::string &line)
 {
 	std::string key, val;
 	size_t pos;
@@ -42,7 +42,7 @@ Stanza::Stanza(std::istream &in)
 		if (line.length() == 0)
 			break;
 
-		ret = parseHeader(line);
+		ret = parse_header(line);
 		if (ret != 0) {
 			throw std::invalid_argument("Invalid input.");
 		}
