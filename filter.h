@@ -1,9 +1,11 @@
 #ifndef __FILTER_H
 #define __FILTER_H
 
-int encode_file(const std::string inFile, const std::string outFile,
-		const unsigned char *key);
-int decode_file(const std::string inFile, const std::string outFile,
-		const unsigned char *key);
+#include <string>
+
+void encode_file(std::ifstream &in, std::ofstream &out,
+		 const std::string &cipher, const unsigned char *key);
+void decode_file(std::ifstream &in, std::ofstream &out,
+		 const std::string &cipher, const unsigned char *key);
 
 #endif /* __FILTER_H */

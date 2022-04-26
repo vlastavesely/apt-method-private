@@ -8,6 +8,7 @@
 #include "fetch.h"
 #include "origin.h"
 #include "cipher.h"
+#include "filter.h"
 
 static struct Suite *create_test_suite()
 {
@@ -26,6 +27,7 @@ static struct Suite *create_test_suite()
 	register_fetch_tests(test_case);
 	register_origin_tests(test_case);
 	register_cipher_tests(test_case);
+	register_filter_tests(test_case);
 
 	return suite;
 }
