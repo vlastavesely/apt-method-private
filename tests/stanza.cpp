@@ -18,7 +18,24 @@ START_TEST(test_stanza)
 }
 END_TEST
 
+START_TEST(test_stanza_failures)
+{
+	std::ifstream in("tests/does-not-exist");
+	std::string message;
+
+	try {
+		Stanza s(in);
+
+	} catch (const std::invalid_argument &e) {
+		message = e.what();
+	}
+
+	ck_assert_str_eq("Failed to read a stanza.", message.data());
+}
+END_TEST
+
 void register_stanza_tests(struct TCase *test_case)
 {
 	tcase_add_test(test_case, test_stanza);
+	tcase_add_test(test_case, test_stanza_failures);
 }

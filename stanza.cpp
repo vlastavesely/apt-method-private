@@ -36,6 +36,10 @@ Stanza::Stanza(std::istream &in)
 	std::string line;
 	int ret;
 
+	if (in.fail()) {
+		throw std::invalid_argument("Failed to read a stanza.");
+	}
+
 	while (in.good()) {
 		std::getline(in, line);
 

@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "test.h"
 #include "../config.h"
 
@@ -22,7 +23,24 @@ START_TEST(test_config)
 }
 END_TEST
 
+START_TEST(test_config_failures)
+{
+	Config config;
+	std::string message = "";
+
+	try {
+		config.load_from_file("tests/does-not-exist");
+
+	} catch (const std::invalid_argument &e) {
+		message = e.what();
+	}
+
+	ck_assert_str_eq("Failed to read the config.", message.data());
+}
+END_TEST
+
 void register_config_tests(struct TCase *test_case)
 {
 	tcase_add_test(test_case, test_config);
+	tcase_add_test(test_case, test_config_failures);
 }

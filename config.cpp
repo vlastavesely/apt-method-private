@@ -7,6 +7,10 @@ int Config::load_from_file(const std::string &config_file)
 	std::fstream in(config_file);
 	std::string origin;
 
+	if (in.fail()) {
+		throw std::invalid_argument("Failed to read the config.");
+	}
+
 	while (in.good()) {
 		Stanza stanza(in);
 
