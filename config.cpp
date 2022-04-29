@@ -4,7 +4,7 @@
 
 int Config::load_from_file(const std::string &config_file)
 {
-	std::fstream in(config_file);
+	std::ifstream in(config_file);
 	std::string origin;
 
 	if (in.fail()) {

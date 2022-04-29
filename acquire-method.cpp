@@ -96,7 +96,7 @@ int AcquireMethod::loop()
 
 	print_capabilities();
 
-	config.load_from_file("config"); /* FIXME */
+	config.load_from_file("/etc/apt/private.conf");
 
 	while (std::cin.good()) {
 		try {

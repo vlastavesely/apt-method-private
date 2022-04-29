@@ -9,7 +9,7 @@
 #define PROGNAME "apt-private-prepare"
 #define VERSION "1.0"
 
-#define CONFIG_FILE "config" // FIXME
+#define CONFIG_FILE "/etc/apt/private.conf"
 
 static const char *usage_str =
 	PROGNAME ", an encoder for encryption of APT repositories.\n"
@@ -35,39 +35,33 @@ static void print_version()
 	std::cout << PROGNAME " v" VERSION  << std::endl;
 }
 
-static int encode_entry(const std::filesystem::directory_entry &entry,
-			const std::string &root, const std::string &dest,
-			Origin &origin)
+static void encode_entry(const std::filesystem::directory_entry &entry,
+			 const std::string &root, const std::string &dest,
+			 Origin &origin)
 {
-	std::string entry_path = entry.path();
-	std::string fragment, dest_file;
-	std::string salt, hash;
-	int ret;
+	std::string entry_path = entry.path(), dest_file;
 
-	fragment = entry_path.substr(root.length());
-	hash = origin.hash;
-	salt = origin.salt;
+	auto fragment = entry_path.substr(root.length());
+	auto hash = origin.hash;
+	auto salt = origin.salt;
+	auto cipher = origin.cipher;
 
 	if (hash == "sha1") {
-		dest_file = dest + "/" + hashSha1(origin.salt, fragment);
+		dest_file = dest + "/" + hash_sha1(origin.salt, fragment);
 	} else {
 		throw std::invalid_argument("Invalid hash.");
 	}
 
 	std::cout << "Encoding: ‘" << entry_path << "’ ... " << std::endl;
 
-	/* FIXME */
-	ret = encode_file(entry_path, dest_file, origin.key);
-
-	return ret;
+	encode_file(entry_path, dest_file, cipher, origin.key);
 }
 
-static int encode_directory(const std::string &src, const std::string &dest,
-			    Origin &origin)
+static void encode_directory(const std::string &src, const std::string &dest,
+			     Origin &origin)
 {
 	std::filesystem::directory_entry dest_dir(dest);
 	std::filesystem::recursive_directory_iterator iter(src);
-	int ret = 0;
 
 	if (!dest_dir.is_directory()) {
 		std::filesystem::create_directories(dest);
@@ -77,19 +71,14 @@ static int encode_directory(const std::string &src, const std::string &dest,
 		if (!entry.is_regular_file() && !entry.is_symlink())
 			continue;
 
-		ret = encode_entry(entry, src, dest, origin);
-		if (ret != 0) {
-			return ret;
-		}
+		encode_entry(entry, src, dest, origin);
 	}
-
-	return 0;
 }
 
 int main(int argc, const char **argv)
 {
-	std::string originName, dest, src, conffile = CONFIG_FILE;
-	int i, ret = 0;
+	std::string origin_name, dest, src, conf_file = CONFIG_FILE;
+	int i;
 
 	for (i = 1; i < argc; i++) {
 		const char *arg = argv[i];
@@ -97,7 +86,7 @@ int main(int argc, const char **argv)
 		if (*arg == '-') {
 			switch (arg[1]) {
 			case 'o':
-				originName = argv[++i];
+				origin_name = argv[++i];
 				continue;
 			case 'd':
 				dest = argv[++i];
@@ -106,7 +95,7 @@ int main(int argc, const char **argv)
 				src = argv[++i];
 				continue;
 			case 'c':
-				conffile = argv[++i];
+				conf_file = argv[++i];
 				continue;
 			case 'h':
 				print_usage();
@@ -121,7 +110,7 @@ int main(int argc, const char **argv)
 		return 1;
 	}
 
-	if (originName == "") {
+	if (origin_name == "") {
 		std::cerr << "target origin was not specified." << std::endl;
 		return 1;
 	}
@@ -141,15 +130,15 @@ int main(int argc, const char **argv)
 
 	try {
 		Config config;
-		config.loadFromFile(conffile);
-		Origin origin(config, originName);
+		config.load_from_file(conf_file);
+		Origin origin(config, origin_name);
 
-		ret = encode_directory(src, dest, origin);
+		encode_directory(src, dest, origin);
 
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << std::endl;
 		return 1;
 	}
 
-	return ret;
+	return 0;
 }

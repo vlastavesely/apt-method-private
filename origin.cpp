@@ -30,10 +30,10 @@ Origin::Origin(Config &config, const std::string &origin)
 
 	cipher = config["Private::" + origin + "::Cipher"];
 	if (cipher == "") {
-		cipher = "cbc(aes256)";
+		cipher = "cbc(aes)";
 	}
 
-	if (hexDecode(key, hexKey) != 0) {
+	if (hex_decode(key, hexKey) != 0) {
 		throw std::invalid_argument("Failed to parse the encryption key.");
 	}
 }
