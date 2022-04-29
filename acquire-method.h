@@ -1,7 +1,7 @@
 #ifndef __ACQUIRE_METHOD_H
 #define __ACQUIRE_METHOD_H
 
-#include "config.h"
+#include "config-file.h"
 #include "stanza.h"
 #include "except.h"
 

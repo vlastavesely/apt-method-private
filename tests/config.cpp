@@ -1,6 +1,6 @@
 #include <stdexcept>
 #include "test.h"
-#include "../config.h"
+#include "../config-file.h"
 
 START_TEST(test_config)
 {

@@ -2,7 +2,7 @@
 #define __ORIGIN_H
 
 #include <string>
-#include "config.h"
+#include "config-file.h"
 
 class Origin final {
 public:

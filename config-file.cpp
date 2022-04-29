@@ -1,5 +1,5 @@
 #include <fstream>
-#include "config.h"
+#include "config-file.h"
 #include "stanza.h"
 
 int Config::load_from_file(const std::string &config_file)

@@ -1,5 +1,5 @@
-#ifndef __CONFIG_H
-#define __CONFIG_H
+#ifndef __CONFIG_FILE_H
+#define __CONFIG_FILE_H
 
 #include <string>
 #include <map>
@@ -12,4 +12,4 @@ public:
 	std::string operator[](const std::string &key);
 };
 
-#endif /* __CONFIG_H */
+#endif /* __CONFIG_FILE_H */
