@@ -2,7 +2,19 @@ HELPER = private
 ENCODER = tools/encoder
 TESTPROG = tests/test
 
-CC = @CXX@
+CC              = @CXX@
+INSTALL         = @INSTALL@
+INSTALL_DATA    = @INSTALL_DATA@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+MKDIR_P         = @MKDIR_P@
+
+prefix      = @prefix@
+exec_prefix = @exec_prefix@
+bindir      = @bindir@
+libdir      = @exec_prefix@/lib
+docdir      = @docdir@
+datarootdir = @datarootdir@
+mandir      = @mandir@
 
 CFLAGS = $(shell pkg-config --cflags openssl libcurl) -Wall -O2 -std=c++20
 LFLAGS = $(shell pkg-config --libs openssl libcurl)
@@ -41,6 +53,15 @@ $(TESTPROG): $(TESTOBJECTS)
 
 test: $(TESTPROG)
 	$(TESTPROG)
+
+install:
+	$(MKDIR_P) $(bindir) $(libdir)/apt/methods
+	$(INSTALL_PROGRAM) tools/encoder -T $(bindir)/apt-private-prepare
+	$(INSTALL_PROGRAM) private $(libdir)/apt/methods
+
+uninstall:
+	$(RM) $(DESTDIR)/usr/bin/apt-private-prepare
+	$(RM) $(DESTDIR)/usr/lib/apt/methods/private
 
 clean:
 	$(RM) $(HELPER) $(ENCODER) $(TESTPROG) *.o *.d */*.o */*.d
