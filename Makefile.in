@@ -25,19 +25,19 @@ all: $(HELPER) $(TESTPROG) $(ENCODER)
 include $(wildcard *.d */*.d)
 
 $(HELPER): main.o $(OBJECTS)
-	$(CC) $^ -o $@ $(LFLAGS)
+	$(QUIET_LD) $(CC) $^ -o $@ $(LFLAGS)
 
 $(ENCODER): tools/encoder.o $(OBJECTS)
-	$(CC) $^ -o $@ $(LFLAGS)
+	$(QUIET_LD) $(CC) $^ -o $@ $(LFLAGS)
 
 %.o: %.cpp
-	$(CC) -MMD -MP -c $< -o $@ $(CFLAGS)
+	$(QUIET_CC) $(CC) -MMD -MP -c $< -o $@ $(CFLAGS)
 
 tests/%.o: tests/%.cpp
-	$(CC) -MMD -MP -c $< -o $@ $(TESTCFLAGS)
+	$(QUIET_CC) $(CC) -MMD -MP -c $< -o $@ $(TESTCFLAGS)
 
 $(TESTPROG): $(TESTOBJECTS)
-	$(CC) $^ -o $@ $(TESTLFLAGS)
+	$(QUIET_LD) $(CC) $^ -o $@ $(TESTLFLAGS)
 
 test: $(TESTPROG)
 	$(TESTPROG)
@@ -49,3 +49,11 @@ clean-aux:
 	$(RM) -r $(AUX_FILES)
 
 distclean: clean clean-aux
+
+
+ifndef V
+QUIET_CC    = @echo "  CC     $@";
+QUIET_LD    = @echo "  CCLD   $@";
+QUIET_AR    = @echo "  AR     $@";
+QUIET_GEN   = @echo "  GEN    $@";
+endif
