@@ -1,76 +1,109 @@
-#include <fstream>
 #include <tuple>
+#include <map>
+#include <stdexcept>
+#include <functional>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "filter.h"
-#include "cipher.h"
 #include "random.h"
+#include "macros.h"
+#include "cipher.h"
 
-#define CHUNKSIZE 16
+#define CHUNKSIZE 1024
 #define MAX_BLOCKSIZE 16
 
-static std::streampos fstream_size(std::ifstream &in)
+static off_t fd_size(int fd)
 {
-	in.seekg(0, in.end);
-	auto size = in.tellg();
-	in.seekg(0, in.beg);
+	off_t offset, size;
+
+	offset = lseek(fd, 0, SEEK_CUR);
+	size = lseek(fd, 0, SEEK_END);
+	lseek(fd, offset, SEEK_SET);
 
 	return size;
 }
 
-static void encrypt_cbc_inplace(unsigned char *buf, unsigned int n,
+static int read_iv(int in, unsigned char *iv, unsigned int len)
+{
+	int n;
+
+	n = read(in, iv, len);
+	if (n != (int) len)
+		return -errno;
+
+	return 0;
+}
+
+static int generate_and_write_iv(int out, unsigned char *iv, unsigned int len)
+{
+	int ret, n;
+
+	ret = randomise(iv, len);
+	if (ret != 0)
+		return ret;
+
+	n = write(out, iv, len);
+	if (n != (int) len)
+		return -errno;
+
+	return 0;
+}
+
+static void encrypt_cbc_inplace(unsigned char *buf, unsigned int len,
 				unsigned char *iv, Cipher &cipher)
 {
 	unsigned int blocksize = cipher.get_blocksize();
 	unsigned int done = 0, i;
 
-	while (n - done) {
+	while (done < len) {
 		for (i = 0; i < blocksize; i++)
-			buf[i] ^= iv[i];
+			buf[done + i] ^= iv[i];
 
-		cipher.encrypt_block(buf, buf);
-		memcpy(iv, buf, blocksize);
+		cipher.encrypt_block(buf + done, buf + done);
+		memcpy(iv, buf + done, blocksize);
 
 		done += blocksize;
-		buf += blocksize;
 	}
 }
 
-static void decrypt_cbc_inplace(unsigned char *buf, unsigned int n,
+static void decrypt_cbc_inplace(unsigned char *buf, unsigned int len,
 				unsigned char *iv, Cipher &cipher)
 {
-	unsigned int blocksize = cipher.get_blocksize();
 	unsigned char tmp[MAX_BLOCKSIZE];
+	unsigned int blocksize = cipher.get_blocksize();
 	unsigned int done = 0, i;
 
-	while (n - done) {
-		memcpy(tmp, buf, blocksize);
+	while (done < len) {
+		memcpy(tmp, buf + done, blocksize);
 
-		cipher.decrypt_block(buf, buf);
+		cipher.decrypt_block(buf + done, buf + done);
 		for (i = 0; i < blocksize; i++)
-			buf[i] ^= iv[i];
+			buf[done + i] ^= iv[i];
 
 		memcpy(iv, tmp, blocksize);
 
 		done += blocksize;
-		buf += blocksize;
 	}
 }
 
-static void encrypt_cbc_file(std::ifstream &in, std::ofstream &out,
-			     Cipher &cipher)
+static int encrypt_cbc_fd(int in, int out, Cipher &cipher)
 {
-	char chunk[CHUNKSIZE + MAX_BLOCKSIZE], iv[MAX_BLOCKSIZE];
-	auto size = fstream_size(in);
-	auto blocksize = cipher.get_blocksize();
-	long int done = 0;
+	unsigned char chunk[CHUNKSIZE + MAX_BLOCKSIZE], iv[MAX_BLOCKSIZE];
+	unsigned int blocksize = cipher.get_blocksize();
+	off_t size = fd_size(in), done = 0;
+	int ret, n;
 
-	randomise(iv, blocksize);
-	out.write(iv, blocksize);
+	ret = generate_and_write_iv(out, iv, blocksize);
+	if (ret != 0)
+		return  ret;
 
 	while (1) {
-		auto n = in.readsome(chunk, blocksize);
-		done += n;
+		n = read(in, chunk, CHUNKSIZE);
+		if (n == -1)
+			return -errno;
 
+		done += n;
 		if (done == size) {
 			auto pad = blocksize - (n % blocksize);
 			memset(chunk + n, 0x00, pad);
@@ -78,48 +111,144 @@ static void encrypt_cbc_file(std::ifstream &in, std::ofstream &out,
 			n += pad;
 		}
 
-		encrypt_cbc_inplace((unsigned char *) chunk, n,
-				    (unsigned char *) iv, cipher);
+		encrypt_cbc_inplace(chunk, n, iv, cipher);
 
-		out.write(chunk, n);
+		n = write(out, chunk, n);
+		if (n == -1) {
+			return -errno;
+		}
+
 		memcpy(iv, chunk, blocksize);
+		if (done == size) {
+			break;
+		}
+	}
+
+	return 0;
+}
+
+static int decrypt_cbc_fd(int in, int out, Cipher &cipher)
+{
+	unsigned char chunk[CHUNKSIZE], iv[MAX_BLOCKSIZE];
+	unsigned int blocksize = cipher.get_blocksize();
+	off_t size = fd_size(in), done = 0;
+	int ret, n;
+
+	ret = read_iv(in, iv, blocksize);
+	if (ret != 0)
+		return ret;
+
+	done = blocksize; /* skip the IV */
+
+	while (1) {
+		n = read(in, chunk, CHUNKSIZE);
+		if (n == -1)
+			return -errno;
+
+		done += n;
+		decrypt_cbc_inplace(chunk, n, iv, cipher);
 
 		if (done == size) {
+			do {
+				n--;
+			} while (n >= 0 && chunk[n] != 0x80);
+		}
+
+		n = write(out, chunk, n);
+		if (n == -1) {
+			return -errno;
+		}
+
+		if (done == size) {
+			break;
+		}
+	}
+
+	return 0;
+}
+
+static void crypt_ctr_inplace(unsigned char *buf, unsigned int len,
+			      unsigned char *iv, Cipher &cipher,
+			      unsigned long long *blockno)
+{
+	unsigned char block[MAX_BLOCKSIZE], out[MAX_BLOCKSIZE];
+	unsigned int blocksize = cipher.get_blocksize();
+	unsigned int done = 0, i;
+
+	memcpy(block, iv, blocksize / 2);
+
+	while (1) {
+		switch (blocksize) {
+		case 8:
+			PUTU32_BE(block + 4, *blockno);
+			break;
+		case 16:
+			PUTU64_BE(block + 8, *blockno);
+			break;
+		}
+
+		cipher.encrypt_block(out, block);
+
+		auto n = len - done > blocksize ? blocksize : len - done;
+		for (i = 0; i < n; i++)
+			buf[done + i] ^= out[i];
+
+		done += n;
+		if (done == len) {
 			break;
 		}
 	}
 }
 
-static void decrypt_cbc_file(std::ifstream &in, std::ofstream &out,
-			     Cipher &cipher)
+static int crypt_ctr_fd(int in, int out, unsigned char *iv, Cipher &cipher)
 {
-	char chunk[CHUNKSIZE], iv[MAX_BLOCKSIZE];
-	auto size = fstream_size(in);
-	auto blocksize = cipher.get_blocksize();
-	long int done = 0;
-
-	in.read(iv, blocksize);
-	done = blocksize;
+	unsigned char chunk[CHUNKSIZE];
+	unsigned long long blockno = 0;
+	int n;
 
 	while (1) {
-		auto n = in.readsome(chunk, blocksize);
-		done += n;
-
-		decrypt_cbc_inplace((unsigned char *) chunk, n,
-				    (unsigned char *) iv, cipher);
-
-		if (done == size) {
-			do {
-				n--;
-			} while (n >= 0 && ((unsigned char*) chunk)[n] != 0x80);
-		}
-
-		out.write(chunk, n);
-
-		if (done == size) {
+		n = read(in, chunk, sizeof(chunk));
+		if (n == -1)
+			return -errno;
+		if (n == 0)
 			break;
+
+		crypt_ctr_inplace(chunk, n, iv, cipher, &blockno);
+
+		if (write(out, chunk, n) != n) {
+			return -errno;
 		}
 	}
+
+	return 0;
+}
+
+static int encrypt_ctr_fd(int in, int out, Cipher &cipher)
+{
+	unsigned char iv[MAX_BLOCKSIZE];
+	unsigned int blocksize = cipher.get_blocksize();
+	unsigned int ivlen = blocksize / 2;
+	int ret;
+
+	ret = generate_and_write_iv(out, iv, ivlen);
+	if (ret != 0)
+		return  ret;
+
+	return crypt_ctr_fd(in, out, iv, cipher);
+}
+
+static int decrypt_ctr_fd(int in, int out, Cipher &cipher)
+{
+	unsigned char iv[MAX_BLOCKSIZE];
+	unsigned int blocksize = cipher.get_blocksize();
+	unsigned int ivlen = blocksize / 2;
+	int ret;
+
+	ret = read_iv(in, iv, ivlen);
+	if (ret != 0)
+		return ret;
+
+	return crypt_ctr_fd(in, out, iv, cipher);
 }
 
 static std::tuple<std::string, std::string> parse_template_name(const std::string &tpl)
@@ -137,30 +266,73 @@ static std::tuple<std::string, std::string> parse_template_name(const std::strin
 	return std::make_tuple(mode, cipher);
 }
 
-void encode_file(std::ifstream &in, std::ofstream &out,
-		 const std::string &template_name, const unsigned char *key)
-{
-	const auto &[mode, cipher_name] = parse_template_name(template_name);
-	Cipher cipher(cipher_name, key);
+typedef std::function<int(int, int, Cipher &cipher)> transform_callback;
 
-	if (mode == "cbc") {
-		encrypt_cbc_file(in, out, cipher);
-		return;
+static std::map<const std::string, transform_callback> encrypt_callbacks = {
+	{"cbc", encrypt_cbc_fd},
+	{"ctr", encrypt_ctr_fd}
+};
+
+static std::map<const std::string, transform_callback> decrypt_callbacks = {
+	{"cbc", decrypt_cbc_fd},
+	{"ctr", decrypt_ctr_fd}
+};
+
+static int transform_file(const std::string &in_file, const std::string &out_file,
+			  Cipher &cipher, transform_callback transform)
+{
+	int in, out, ret;
+
+	in = open(in_file.data(), O_RDONLY);
+	if (in == -1)
+		return -1;
+
+	out = open(out_file.data(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (out == -1) {
+		close(in);
+		return -1;
 	}
 
-	throw std::invalid_argument("Invalid cipher.");
+	ret = transform(in, out, cipher);
+
+	close(in);
+	close(out);
+
+	return ret;
 }
 
-void decode_file(std::ifstream &in, std::ofstream &out,
+void encode_file(const std::string &in_file, const std::string &out_file,
 		 const std::string &template_name, const unsigned char *key)
 {
 	const auto &[mode, cipher_name] = parse_template_name(template_name);
 	Cipher cipher(cipher_name, key);
+	int ret;
 
-	if (mode == "cbc") {
-		decrypt_cbc_file(in, out, cipher);
-		return;
+	auto transform = encrypt_callbacks[mode];
+	if (transform == nullptr) {
+		throw std::invalid_argument("Invalid encryption mode.");
 	}
 
-	throw std::invalid_argument("Invalid cipher.");
+	ret = transform_file(in_file, out_file, cipher, transform);
+	if (ret != 0) {
+		throw std::runtime_error("Failed to encrypt the file.");
+	}
+}
+
+void decode_file(const std::string &in_file, const std::string &out_file,
+		 const std::string &template_name, const unsigned char *key)
+{
+	const auto &[mode, cipher_name] = parse_template_name(template_name);
+	Cipher cipher(cipher_name, key);
+	int ret;
+
+	auto transform = decrypt_callbacks[mode];
+	if (transform == nullptr) {
+		throw std::invalid_argument("Invalid decryption mode.");
+	}
+
+	ret = transform_file(in_file, out_file, cipher, transform);
+	if (ret != 0) {
+		throw std::runtime_error("Failed to decrypt the file.");
+	}
 }

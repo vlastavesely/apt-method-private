@@ -1,12 +1,22 @@
-#include <fstream>
+#include <stdexcept>
+#include <fcntl.h>
+#include <unistd.h>
 #include "random.h"
 
-void randomise(char *buf, unsigned int len)
+int randomise(unsigned char *buf, unsigned int len)
 {
-	std::ifstream in("/dev/urandom", std::ios::binary);
+	int fd, n;
 
-	if (!in.good())
-		throw std::invalid_argument("Failed to read random data.");
+	fd = open("/dev/urandom", O_RDONLY);
+	if (fd == -1)
+		return -errno;
 
-	in.read(buf, len);
+	n = read(fd, buf, len);
+	if (n != (int) len) {
+		int saved_errno = errno;
+		close(fd);
+		return -saved_errno;
+	}
+
+	return 0;
 }

@@ -3,6 +3,7 @@
  * http://www.fifi.org/doc/libapt-pkg-doc/method.html/ch2.html
  */
 #include <iostream>
+#include <stdexcept>
 #include "acquire-method.h"
 #include "stanza.h"
 
@@ -73,14 +74,9 @@ void AcquireMethod::report_uri_failure(const uri_exception &e)
 int AcquireMethod::acquire(std::istream &in)
 {
 	Stanza stanza(in);
-	int ret = 0;
 
 	try {
-		/* TODO handle the return code...? */
-		ret = fetch_file(stanza);
-		if (ret != 0) {
-			throw std::invalid_argument("XXX"); // FIXME
-		}
+		fetch_file(stanza);
 
 	} catch (const uri_exception &e) {
 		report_uri_failure(e);
@@ -89,7 +85,7 @@ int AcquireMethod::acquire(std::istream &in)
 
 	send_message("201 URI Done", {{"URI", stanza["URI"]}});
 
-	return ret;
+	return 0;
 }
 
 int AcquireMethod::loop()
@@ -122,6 +118,10 @@ int AcquireMethod::loop()
 				throw std::invalid_argument("Unexpected command.");
 				break;
 			}
+
+		} catch (const std::runtime_error &e) {
+			report_general_failure(e.what());
+			return -1;
 
 		} catch (const std::invalid_argument &e) {
 			report_general_failure(e.what());

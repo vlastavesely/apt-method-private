@@ -14,7 +14,7 @@ protected:
 			  const std::map<std::string, std::string> &fields);
 	void report_general_failure(const std::string &message);
 	void report_uri_failure(const uri_exception &e);
-	virtual int fetch_file(Stanza &request) = 0;
+	virtual void fetch_file(Stanza &request) = 0;
 public:
 	int loop();
 };

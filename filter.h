@@ -3,9 +3,9 @@
 
 #include <string>
 
-void encode_file(std::ifstream &in, std::ofstream &out,
+void encode_file(const std::string &in_file, const std::string &out_file,
 		 const std::string &cipher, const unsigned char *key);
-void decode_file(std::ifstream &in, std::ofstream &out,
+void decode_file(const std::string &in_file, const std::string &out_file,
 		 const std::string &cipher, const unsigned char *key);
 
 #endif /* __FILTER_H */
