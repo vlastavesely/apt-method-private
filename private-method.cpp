@@ -44,16 +44,18 @@ void PrivateMethod::fetch_file(Stanza &request)
 	filename = request["Filename"];
 	filename_part = request["Filename"] + ".part";
 
-	ret = fetch_uri(real_uri, filename_part);
-	if (ret != 0)
-		goto out;
-
 	try {
+		ret = fetch_uri(real_uri, filename_part);
+		if (ret != 0) {
+			throw std::runtime_error("Failed to fetch the URI");
+		}
+
 		process_file(uri, filename_part, filename);
+
 	} catch (const std::exception &e) {
 		remove(filename_part.data());
 		throw; /* rethrow */
 	}
-out:
+
 	remove(filename_part.data());
 }
