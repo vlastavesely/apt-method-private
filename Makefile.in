@@ -32,7 +32,6 @@ AUX_FILES = Makefile configure aclocal.m4 install-sh config.h* *.log	\
 	*.status *.cache
 
 all: $(HELPER) $(TESTPROG) $(ENCODER)
-	sh test.sh
 
 include $(wildcard *.d */*.d)
 
