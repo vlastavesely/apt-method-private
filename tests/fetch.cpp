@@ -3,6 +3,7 @@
 #include "test.h"
 #include "../fetch.h"
 
+#define MAX_TEST_FILE 512
 #define TEST_FILE "/tmp/apt-transport-private.test"
 
 static int load_file(char *out, const char *filename)
@@ -10,7 +11,7 @@ static int load_file(char *out, const char *filename)
 	std::ifstream in(filename);
 	int n;
 
-	n = in.readsome(out, 512);
+	n = in.readsome(out, MAX_TEST_FILE);
 	out[n] = '\0';
 
 	return 0;
@@ -19,7 +20,7 @@ static int load_file(char *out, const char *filename)
 START_TEST(test_fetch)
 {
 	std::string uri, cwd;
-	char a[512], b[512];
+	char a[MAX_TEST_FILE], b[MAX_TEST_FILE];
 	int ret;
 
 	remove(TEST_FILE);
