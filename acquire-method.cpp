@@ -83,7 +83,9 @@ int AcquireMethod::acquire(std::istream &in)
 		return 100;
 	}
 
-	send_message("201 URI Done", {{"URI", stanza["URI"]}});
+	send_message("201 URI Done", {
+		{"URI", stanza["URI"]}, {"Filename", stanza["Filename"]}
+	});
 
 	return 0;
 }
