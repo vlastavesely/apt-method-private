@@ -16,11 +16,11 @@ docdir      = @docdir@
 datarootdir = @datarootdir@
 mandir      = @mandir@
 
-CFLAGS = $(shell pkg-config --cflags openssl libcurl) -Wall -O2 -std=c++20
-LFLAGS = $(shell pkg-config --libs openssl libcurl)
+CFLAGS = @OPENSSL_CFLAGS@ @CURL_CFLAGS@ -Wall -O2 -std=c++20
+LFLAGS = @OPENSSL_LIBS@ @CURL_LIBS@
 
-TESTCFLAGS = $(CFLAGS) $(shell pkg-config --cflags check)
-TESTLFLAGS = $(LFLAGS) $(shell pkg-config --libs check)
+TESTCFLAGS = @CHECK_CFLAGS@ $(CFLAGS)
+TESTLFLAGS = @CHECK_LIBS@ $(LFLAGS)
 
 OBJECTS = private-method.o acquire-method.o stanza.o config-file.o	\
 	uri.o hash.o hex.o fetch.o filter.o cipher.o origin.o random.o

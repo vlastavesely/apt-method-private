@@ -14,6 +14,9 @@ AC_PROG_MKDIR_P
 AC_PROG_MAKE_SET
 
 # Checks for libraries.
+PKG_CHECK_MODULES(OPENSSL, openssl)
+PKG_CHECK_MODULES(CURL, libcurl)
+PKG_CHECK_MODULES(CHECK, check)
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h string.h unistd.h])
