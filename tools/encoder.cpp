@@ -1,6 +1,5 @@
 #include <filesystem>
 #include <iostream>
-#include <stdarg.h>
 #include "../config-file.h"
 #include "../origin.h"
 #include "../hash.h"
