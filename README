@@ -1,0 +1,55 @@
+APT Helper for Encrypted Repositories
+=====================================
+This is a helper method for the APT packaging tool that allows users to fetch
+packages from encrypted remote repositories. The idea behind this helper method
+is to combine the comfort of working with online APT repositories and the
+security of packages and scripts that are strictly kept offline and not freely
+accessible in the Internet.
+
+
+Design
+------
+A public APT repository is a directory tree with a distinctive structure
+containing DEB packages. In the standard scenario, the tree is published as it
+is on the Internet and users can freely download the packages. This package
+allows you to (1) encrypt your private APT repository and (2) hide its
+directory structure at the same time.
+
+This package contains two programs: the encoder ‘apt-private-prepare’, and
+the APT transport method ‘private’.
+
+The first program is used to encrypt your APT repository using the following
+process:
+
+  (1) a list of files in the source directory is created,
+
+  (2) for every file, a unique file name is generated using a random salt
+      (optional) and the relative path of the file (starting with a slash) in
+      the source directory, and
+
+  (3) the content of every file is encrypted and saved into the destination
+      directory under the generated name corresponding to the file.
+
+The whole structure of the source repository will be reduced to a flat
+directory that contains all files in one level. The result can be safely
+published on a remote server.
+
+If you configure your APT installation properly, it will be able to fetch
+packages from such a repository using the ‘private’ method helper, without
+a need for interaction with the user.
+
+For details on setup and information about the implementation details see the
+included manual pages.
+
+
+Licensing Notice
+----------------
+This software is released under the terms of the GPL license version 2 as
+published by the Free Software Foundation. You can freely redistribute and/or
+modify the software under the terms of the license.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+For more information on details of the license, see the file COPYING.
