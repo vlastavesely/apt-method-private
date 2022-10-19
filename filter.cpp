@@ -118,7 +118,6 @@ static int encrypt_cbc_fd(int in, int out, Cipher &cipher)
 			return -errno;
 		}
 
-		memcpy(iv, chunk, blocksize);
 		if (done == size) {
 			break;
 		}
