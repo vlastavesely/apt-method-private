@@ -59,8 +59,8 @@ install:
 	$(INSTALL_PROGRAM) private $(libdir)/apt/methods
 
 uninstall:
-	$(RM) $(DESTDIR)/usr/bin/apt-private-prepare
-	$(RM) $(DESTDIR)/usr/lib/apt/methods/private
+	$(RM) $(bindir)/apt-private-prepare
+	$(RM) $(libdir)/apt/methods/private
 
 clean:
 	$(RM) $(HELPER) $(ENCODER) $(TESTPROG) *.o *.d */*.o */*.d
