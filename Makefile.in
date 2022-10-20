@@ -54,13 +54,15 @@ test: $(TESTPROG)
 	$(TESTPROG)
 
 install:
-	$(MKDIR_P) $(bindir) $(libdir)/apt/methods
+	$(MKDIR_P) $(bindir) $(libdir)/apt/methods $(docdir)
 	$(INSTALL_PROGRAM) tools/encoder -T $(bindir)/apt-private-prepare
 	$(INSTALL_PROGRAM) private $(libdir)/apt/methods
+	$(INSTALL_DATA) tests/files/private.conf -T $(docdir)/example-private.conf
 
 uninstall:
 	$(RM) $(bindir)/apt-private-prepare
 	$(RM) $(libdir)/apt/methods/private
+	$(RM) $(docdir)/example-private.conf
 
 clean:
 	$(RM) $(HELPER) $(ENCODER) $(TESTPROG) *.o *.d */*.o */*.d
