@@ -28,10 +28,14 @@ OBJECTS = private-method.o acquire-method.o stanza.o config-file.o	\
 TESTSOURCES = $(wildcard tests/*.cpp)
 TESTOBJECTS = $(OBJECTS) $(TESTSOURCES:%.cpp=%.o)
 
+MAN_PAGES = man/apt-private-prepare.1.gz man/apt-transport-private.8.gz	\
+	man/private.conf.5.gz
+
 AUX_FILES = Makefile configure aclocal.m4 install-sh config.h* *.log	\
 	*.status *.cache
 
-all: $(HELPER) $(TESTPROG) $(ENCODER)
+
+all: $(HELPER) $(TESTPROG) $(ENCODER) $(MAN_PAGES)
 
 include $(wildcard *.d */*.d)
 
@@ -53,19 +57,33 @@ $(TESTPROG): $(TESTOBJECTS)
 test: $(TESTPROG)
 	$(TESTPROG)
 
-install:
+man/%.gz: man/%
+	$(QUIET_GEN) cat $< | gzip -f >$@
+
+install: install-man-pages
 	$(MKDIR_P) $(bindir) $(libdir)/apt/methods $(docdir)
 	$(INSTALL_PROGRAM) tools/encoder -T $(bindir)/apt-private-prepare
 	$(INSTALL_PROGRAM) private $(libdir)/apt/methods
 	$(INSTALL_DATA) tests/files/private.conf -T $(docdir)/example-private.conf
 
-uninstall:
+install-man-pages:
+	$(MKDIR_P) $(mandir)/man1 $(mandir)/man5 $(mandir)/man8
+	$(INSTALL_DATA) man/apt-private-prepare.1.gz $(mandir)/man1
+	$(INSTALL_DATA) man/private.conf.5.gz $(mandir)/man5
+	$(INSTALL_DATA) man/apt-transport-private.8.gz $(mandir)/man8
+
+uninstall: uninstall-man-pages
 	$(RM) $(bindir)/apt-private-prepare
 	$(RM) $(libdir)/apt/methods/private
 	$(RM) $(docdir)/example-private.conf
 
+uninstall-man-pages:
+	$(RM) $(mandir)/man1/apt-private-prepare.1.gz
+	$(RM) $(mandir)/man5/private.conf.5.gz
+	$(RM) $(mandir)/man8/apt-transport-private.8.gz
+
 clean:
-	$(RM) $(HELPER) $(ENCODER) $(TESTPROG) *.o *.d */*.o */*.d
+	$(RM) $(HELPER) $(ENCODER) $(TESTPROG) *.o *.d */*.o */*.d man/*.gz
 
 clean-aux:
 	$(RM) -r $(AUX_FILES)
