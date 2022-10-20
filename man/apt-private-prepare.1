@@ -1,0 +1,103 @@
+.TH "apt-private-prepare" "1" "20 October 2022" "apt-transport-private" "APT Encrypted Repositories"
+
+.SH NAME
+.B apt-private-prepare
+- encoder of repositories for
+.BR apt-transport-private (8).
+
+
+.SH SYNOPSIS
+.SY apt-private-prepare
+.RB [ -o
+.IR ORIGIN ]
+.RB [ -s
+.IR DIR ]
+.RB [ -d
+.IR DIR ]
+.RB [ -c
+.IR FILE ]
+.OP -h
+.OP -v
+.YS
+
+
+.SH DESCRIPTION
+.B apt-private-prepare
+is a tool that can be used to prepare an encrypted APT repository that can be
+made accessible using the
+.BR apt-transport-private (8)
+package.
+
+
+.SH OPTIONS
+.B \-o
+.I ORIGIN
+.RS 4
+Name of the repository. By this name, the repository is identified in both
+configuration files, namely in
+.I /etc/apt/private.conf
+and
+.IR /etc/apt/sources.list .
+.RE
+
+.B \-s
+.I DIR
+.RS 4
+Source directory containing the unencrypted APT repository.
+.RE
+
+.B \-d
+.I DIR
+.RS 4
+Destination directory into which the repository should be encrypted.
+.RE
+
+.B \-c
+.I FILE
+.RS 4
+Path to the configuration file. This parameter is optional. If it is not
+specified, the default value
+.RI ' /etc/apt/private.conf '
+is used. See
+.BR private.conf (5)
+for more information about structure of the file.
+.RE
+
+.B \-h
+.RS 4
+Show usage information and exit.
+.RE
+
+.B \-v
+.RS 4
+Show version number and exit.
+.RE
+
+
+.SH LIMITATIONS
+At this point, there are some limitations that limit you to some preset values
+and available algorithms:
+
+.IP \(bu 4
+The repository encoder is not suitable for
+.I big
+repositories since there is no mechanism for incremental updating.
+Even the smallest change requires regeneration of the whole repository.
+
+.IP \(bu 4
+The method uses only the AES cipher and no other.
+
+
+.SH LICENSE AND WARRANTY
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License version 2 as published by the
+Free Software Foundation.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+
+.SH SEE ALSO
+.BR apt-transport-private (8),
+.BR private.conf (5).

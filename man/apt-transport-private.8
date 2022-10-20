@@ -1,0 +1,83 @@
+.TH "apt-transport-private" "8" "20 October 2022" "apt-transport-private" "APT Encrypted Repositories"
+
+.SH NAME
+.B apt-transport-private
+- fetch encrypted DEB packages.
+
+
+.SH DESCRIPTION
+.B apt-transport-private
+is a package which contains an APT method helper allowing to fetch encrypted
+APT packages stored on a HTTP or FTP server.
+
+
+.SH CONFIGURATION
+The information about remote repositories is stored in the
+.I /etc/apt/private.conf
+file. See
+.BR private.conf (5)
+for more information.
+
+To enable fetching from an encrypted repository, you need:
+
+.B Prepare a repository
+.RS 4
+Create an APT repository using any tool you like
+.RB ( reprepro (1),
+.BR apt-ftparchive (1),
+etc.). Then, the directory that contains the generated repository must be
+encrypted using
+.BR apt-private-prepare (1).
+Because the encoder encodes the whole repository, it should be as small as
+possible but there is no hard limit to the size.
+.RE
+
+.B Upload the repository
+.RS 4
+Then you can upload the encrypted files to a server. This method supports
+fetching from
+.I HTTP
+and
+.I FTP
+servers (with SSL). Since
+.BR libcurl (3) 
+is used for networking, it should be possible to use any other protocol
+supported by the library, but this was not tested and there is no official
+support.
+.RE
+
+.B Configure APT
+.RS 4
+The final step is configuration. Put information about the remote server and
+the encryption key that can be used for decryption of the packages into
+.I /etc/apt/private.conf
+and add a record into the
+.I /etc/apt/sources.list
+file in the same way like in the case of any other protocol (see
+.BR sources.list (5)
+for details):
+.RS 4
+
+deb private://myserver/ stable main
+
+.RE
+If the configuration was successful, you can synchronise the package indexes
+from the repositories and install packages from them in the same way you would
+do from any other repository.
+.RE
+
+
+.SH LICENSE AND WARRANTY
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License version 2 as published by the
+Free Software Foundation.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+
+.SH SEE ALSO
+.BR apt-private-prepare (1),
+.BR private.conf (5),
+.BR sources.list (5).
