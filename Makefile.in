@@ -61,10 +61,10 @@ man/%.gz: man/%
 	$(QUIET_GEN) cat $< | gzip -f >$@
 
 install: install-man-pages
-	$(MKDIR_P) $(bindir) $(libdir)/apt/methods $(docdir)
+	$(MKDIR_P) $(bindir) $(libdir)/apt/methods $(docdir)/example
 	$(INSTALL_PROGRAM) tools/encoder -T $(bindir)/apt-private-prepare
 	$(INSTALL_PROGRAM) private $(libdir)/apt/methods
-	$(INSTALL_DATA) tests/files/private.conf -T $(docdir)/example-private.conf
+	$(INSTALL_DATA) tests/files/private.conf $(docdir)/example
 
 install-man-pages:
 	$(MKDIR_P) $(mandir)/man1 $(mandir)/man5 $(mandir)/man8
@@ -75,7 +75,7 @@ install-man-pages:
 uninstall: uninstall-man-pages
 	$(RM) $(bindir)/apt-private-prepare
 	$(RM) $(libdir)/apt/methods/private
-	$(RM) $(docdir)/example-private.conf
+	$(RM) $(docdir)/example
 
 uninstall-man-pages:
 	$(RM) $(mandir)/man1/apt-private-prepare.1.gz
