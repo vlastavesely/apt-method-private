@@ -102,8 +102,25 @@ START_TEST(test_ctr_filter)
 }
 END_TEST
 
+START_TEST(test_bad_filter)
+{
+	std::string msg;
+
+	try {
+		test_encode("xxx(aes)", "tests/files/repo/a",
+			    "/tmp/apt-transport-private.a.aes-xxx.enc",
+			    "/tmp/apt-transport-private.a.aes-xxx.dec", 0, 0);
+	} catch (const std::invalid_argument &e) {
+		msg = e.what();
+	}
+
+	ck_assert_str_eq("Invalid encryption mode.", msg.data());
+}
+END_TEST
+
 void register_filter_tests(struct TCase *test_case)
 {
 	tcase_add_test(test_case, test_cbc_filter);
 	tcase_add_test(test_case, test_ctr_filter);
+	tcase_add_test(test_case, test_bad_filter);
 }
