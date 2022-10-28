@@ -10,6 +10,8 @@ struct aes_keys {
 
 Cipher::Cipher(const std::string &cipher_name, const unsigned char *key)
 {
+	/* The cipher is AES-256. No other ciphers or keysizes are supported
+	 * at this time. */
 	if (cipher_name != "aes")
 		throw std::invalid_argument("Invalid cipher name");
 

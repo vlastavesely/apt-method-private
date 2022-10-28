@@ -1,4 +1,4 @@
-.TH "private.conf" "5" "20 October 2022" "apt-transport-private" "APT Encrypted Repositories"
+.TH "private.conf" "5" "28 October 2022" "apt-transport-private" "APT Encrypted Repositories"
 
 .SH NAME
 .B private.conf
@@ -70,7 +70,9 @@ Allowed ciphers:
 .IR AES .
 The format of the field is
 .RI ' mode ( cipher )'
-(in lowercase).
+(in lowercase). The
+.I AES
+is the 256-bit version of the cipher.
 .RE
 
 .B Salt
