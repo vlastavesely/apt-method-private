@@ -1,6 +1,7 @@
 /private
 /tools/encoder
 /tests/test
+/man/*.gz
 *.o
 *.d
 
