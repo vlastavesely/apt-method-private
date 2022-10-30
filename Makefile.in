@@ -16,7 +16,7 @@ docdir      = @docdir@
 datarootdir = @datarootdir@
 mandir      = @mandir@
 
-CFLAGS = @OPENSSL_CFLAGS@ @CURL_CFLAGS@ -Wall -O2 -std=c++20
+CFLAGS = @OPENSSL_CFLAGS@ @CURL_CFLAGS@ -Wall -O2 -std=c++2a
 LFLAGS = @OPENSSL_LIBS@ @CURL_LIBS@
 
 TESTCFLAGS = @CHECK_CFLAGS@ $(CFLAGS)
