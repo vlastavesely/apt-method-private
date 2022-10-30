@@ -12,6 +12,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: dependencies
+      run: sudo apt update && sudo apt-get install -y libcurl4-openssl-dev check
     - name: configure
       run: sh autogen.sh && ./configure
     - name: make
