@@ -19,10 +19,9 @@ PKG_CHECK_MODULES(CURL, libcurl)
 PKG_CHECK_MODULES(CHECK, check)
 
 # Checks for header files.
-AC_CHECK_HEADERS([fcntl.h string.h unistd.h])
+AC_CHECK_HEADERS([fcntl.h string.h unistd.h stdbool.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
