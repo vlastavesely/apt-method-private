@@ -4,9 +4,10 @@
 #include "../origin.h"
 #include "../hash.h"
 #include "../filter.h"
+#include "../config.h"
 
-#define PROGNAME "apt-private-prepare"
-#define VERSION "1.0"
+#define PROGNAME PACKAGE_NAME
+#define VERSION PACKAGE_VERSION
 
 #define CONFIG_FILE "/etc/apt/private.conf"
 
@@ -31,7 +32,7 @@ static void print_usage()
 
 static void print_version()
 {
-	std::cout << PROGNAME " v" VERSION  << std::endl;
+	std::cout << PROGNAME " " VERSION  << std::endl;
 }
 
 static void encode_entry(const std::filesystem::directory_entry &entry,
