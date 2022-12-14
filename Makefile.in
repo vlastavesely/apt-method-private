@@ -1,3 +1,5 @@
+PACKAGE_NAME = @PACKAGE_NAME@
+
 HELPER = private
 ENCODER = tools/encoder
 TESTPROG = tests/test
@@ -61,10 +63,10 @@ man/%.gz: man/%
 	$(QUIET_GEN) cat $< | gzip -f >$@
 
 install: install-man-pages
-	$(MKDIR_P) $(bindir) $(libdir)/apt/methods $(docdir)/example
+	$(MKDIR_P) $(bindir) $(libdir)/apt/methods $(docdir)/$(PACKAGE_NAME)/example
 	$(INSTALL_PROGRAM) tools/encoder -T $(bindir)/apt-private-prepare
 	$(INSTALL_PROGRAM) private $(libdir)/apt/methods
-	$(INSTALL_DATA) tests/files/private.conf $(docdir)/example
+	$(INSTALL_DATA) tests/files/private.conf $(docdir)/$(PACKAGE_NAME)/example
 
 install-man-pages:
 	$(MKDIR_P) $(mandir)/man1 $(mandir)/man5 $(mandir)/man8
