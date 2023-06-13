@@ -3,6 +3,7 @@
  * http://www.fifi.org/doc/libapt-pkg-doc/method.html/ch2.html
  */
 #include <iostream>
+#include <algorithm>
 #include <stdexcept>
 #include "acquire-method.h"
 #include "stanza.h"
