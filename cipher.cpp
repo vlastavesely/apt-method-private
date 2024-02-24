@@ -1,12 +1,6 @@
 #include <stdexcept>
 #include <string.h>
-#include <openssl/aes.h>
 #include "cipher.h"
-
-struct aes_keys {
-	AES_KEY ek;
-	AES_KEY dk;
-};
 
 Cipher::Cipher(const std::string &cipher_name, const unsigned char *key)
 {
@@ -15,19 +9,19 @@ Cipher::Cipher(const std::string &cipher_name, const unsigned char *key)
 	if (cipher_name != "aes")
 		throw std::invalid_argument("Invalid cipher name");
 
-	subkeys = new struct aes_keys;
-	AES_set_encrypt_key(key, 256, &((struct aes_keys *) subkeys)->ek);
-	AES_set_decrypt_key(key, 256, &((struct aes_keys *) subkeys)->dk);
+	ctx_enc = EVP_CIPHER_CTX_new();
+	EVP_CIPHER_CTX_set_padding(ctx_enc, 0);
+	EVP_EncryptInit_ex(ctx_enc, EVP_aes_256_ecb(), NULL, key, NULL);
+
+	ctx_dec = EVP_CIPHER_CTX_new();
+	EVP_CIPHER_CTX_set_padding(ctx_dec, 0);
+	EVP_DecryptInit_ex(ctx_dec, EVP_aes_256_ecb(), NULL, key, NULL);
 }
 
 Cipher::~Cipher()
 {
-	struct aes_keys *keys = (struct aes_keys *) subkeys;
-
-	memset(&keys->ek, '\0', sizeof(keys->ek));
-	memset(&keys->dk, '\0', sizeof(keys->dk));
-
-	delete keys;
+	EVP_CIPHER_CTX_free(ctx_enc);
+	EVP_CIPHER_CTX_free(ctx_dec);
 }
 
 unsigned int Cipher::get_blocksize()
@@ -37,10 +31,12 @@ unsigned int Cipher::get_blocksize()
 
 void Cipher::encrypt_block(unsigned char *out, const unsigned char *in)
 {
-	AES_encrypt(in, out, &((struct aes_keys *) subkeys)->ek);
+	int outl;
+	EVP_EncryptUpdate(ctx_enc, out, &outl, in, get_blocksize());
 }
 
 void Cipher::decrypt_block(unsigned char *out, const unsigned char *in)
 {
-	AES_decrypt(in, out, &((struct aes_keys *) subkeys)->dk);
+	int outl;
+	EVP_DecryptUpdate(ctx_dec, out, &outl, in, get_blocksize());
 }
